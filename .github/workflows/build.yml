@@ -1,0 +1,45 @@
+name: build
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install sing-box
+        run: |
+          set -euo pipefail
+          tag=$(curl -fsSL https://api.github.com/repos/SagerNet/sing-box/releases/latest | jq -r .tag_name)
+          version=${tag#v}
+          curl -fsSL -o /tmp/sing-box.tar.gz "https://github.com/SagerNet/sing-box/releases/download/${tag}/sing-box-${version}-linux-amd64.tar.gz"
+          tar -xzf /tmp/sing-box.tar.gz -C /tmp
+          sudo install -m 755 "/tmp/sing-box-${version}-linux-amd64/sing-box" /usr/local/bin/sing-box
+          sing-box version
+
+      - name: Build rule-sets
+        run: python3 build.py
+
+      - name: Publish to ruleset branch
+        run: |
+          set -euo pipefail
+          cd dist
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "build $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:ruleset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
