@@ -1,0 +1,12 @@
+{
+ "pro": {
+  "source": "https://hagezi-mirror.dnsbunker.org/adblock/pro.txt",
+  "domains": 214941,
+  "bytes": 1625691
+ },
+ "tif": {
+  "source": "https://hagezi-mirror.dnsbunker.org/adblock/tif.txt",
+  "domains": 1711967,
+  "bytes": 8806962
+ }
+}
