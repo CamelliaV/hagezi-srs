@@ -19,13 +19,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install sing-box
+        env:
+          SING_BOX_VERSION: "1.14.4"
         run: |
           set -euo pipefail
-          tag=$(curl -fsSL https://api.github.com/repos/SagerNet/sing-box/releases/latest | jq -r .tag_name)
-          version=${tag#v}
-          curl -fsSL -o /tmp/sing-box.tar.gz "https://github.com/SagerNet/sing-box/releases/download/${tag}/sing-box-${version}-linux-amd64.tar.gz"
+          curl -fsSL -o /tmp/sing-box.tar.gz "https://github.com/SagerNet/sing-box/releases/download/v${SING_BOX_VERSION}/sing-box-${SING_BOX_VERSION}-linux-amd64.tar.gz"
           tar -xzf /tmp/sing-box.tar.gz -C /tmp
-          sudo install -m 755 "/tmp/sing-box-${version}-linux-amd64/sing-box" /usr/local/bin/sing-box
+          sudo install -m 755 "/tmp/sing-box-${SING_BOX_VERSION}-linux-amd64/sing-box" /usr/local/bin/sing-box
           sing-box version
 
       - name: Build rule-sets
